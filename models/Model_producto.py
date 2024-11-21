@@ -4,7 +4,7 @@ from config.database import db
 
 
 class Producto(db.Model):
-    __tablename__ = 'Productos'
+    __tablename__ = 'productos'
     
     id = db.Column(db.Integer, primary_key=True)
     titulo = db.Column(db.String(255),)

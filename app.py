@@ -1,5 +1,7 @@
 from flask import Flask,request,jsonify
 from config.database import db,app
+from models.Model_carrito import Carrito
+from models.Model_producto import Producto
 
 db.init_app(app)
 
@@ -30,6 +32,8 @@ def Hola():
 
 
 
-if __name__ == "__main__":
-    app.run(debug=True, host="0,0,0,0")
+
+
+if __name__ == '__main__':
+    app.run(debug=True,host='0.0.0.0')
 
