@@ -9,9 +9,8 @@ class Producto(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     titulo = db.Column(db.String(255),)
     imagen = db.Column(db.String(255),) 
-    categoria_nombre = db.Column(db.String(50),)
-    categoria_id = db.Column(db.String(50),)
-    precio = db.Column(db.Float)
+    categoria = db.Column(db.String(50),)
+    precio = db.Column(db.String(50))
     talla = db.Column(db.String(10))
     cantidad = db.Column(db.Integer)
 
@@ -20,10 +19,7 @@ class Producto(db.Model):
             "id": self.id,
             "titulo": self.titulo,
             "imagen": self.imagen,
-            "categoria": {
-                "nombre": self.categoria_nombre,
-                "id": self.categoria_id
-            },
+            "categoria": self.categoria,
             "precio": self.precio,
             "talla": self.talla,
             "cantidad": self.cantidad

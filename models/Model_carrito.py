@@ -7,9 +7,8 @@ class Carrito(db.Model):
     id_producto= db.Column(db.Integer,db.ForeignKey("productos.id"))
     titulo = db.Column(db.String(255), )
     imagen = db.Column(db.String(255), ) 
-    categoria_nombre = db.Column(db.String(50),)
-    categoria_id = db.Column(db.String(50),)
-    precio = db.Column(db.Float,)
+    categoria = db.Column(db.String(50),)
+    precio = db.Column(db.String(50))
     talla = db.Column(db.String(10),)
     cantidad = db.Column(db.Integer,)
 
@@ -19,10 +18,7 @@ class Carrito(db.Model):
             "id_producto": self.id_producto,
             "titulo": self.titulo,
             "imagen": self.imagen,
-            "categoria": {
-                "nombre": self.categoria_nombre,
-                "id": self.categoria_id
-            },
+            "categoria": self.categoria,
             "precio": self.precio,
             "talla": self.talla,
             "cantidad": self.cantidad
