@@ -2,6 +2,21 @@ from flask import Flask,request,jsonify,render_template
 from config.database import db,app
 from models.Model_carrito import Carrito
 from models.Model_producto import Producto
+import os
+from werkzeug.utils import secure_filename
+
+
+
+UPLOAD_FOLDER = 'config/static/img' 
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'} 
+
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 db.init_app(app)
 
@@ -10,16 +25,18 @@ with app.app_context():
 
 
 
-
 #RUTAS
 @app.route("/")
 def index():
     return render_template("index.html")
 
+@app.route("/registrarproducto")
+def registrar_producto():
+    return render_template("Agregar_producto.html")
+
 @app.route("/carrito")
 def carrito():
     return render_template("carrito.html")
-
 
 # AGREGAR
 @app.route('/Agregarproducto',methods = ['POST'])
@@ -52,6 +69,32 @@ def Agregar_carrito():
     db.session.add(nuevo_procurador)
     db.session.commit()
     return 'Producto guardado',201
+
+@app.route('/subir_imagen', methods=['POST'])
+def subir_imagen():
+    
+    if 'imagen' not in request.files:
+        return 'No image part', 405
+
+    imagen = request.files['imagen']
+
+    
+    if imagen.filename == '':
+        return 'No selected file', 400
+
+    if imagen and allowed_file(imagen.filename):
+        
+        filename = secure_filename(imagen.filename)
+        image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        imagen.save(image_path)
+        image_url = f'/static/img/{filename}'
+
+        return jsonify({'message': 'Imagen subida exitosamente', 'image_url': image_url}), 200
+    else:
+        return jsonify({'message': 'Tipo de archivo no permitido'}), 403
+
+
+
 
 #OBTENER
 @app.route('/Obtenerproductos',methods = ['GET'])
