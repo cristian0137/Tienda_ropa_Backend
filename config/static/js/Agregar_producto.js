@@ -34,9 +34,34 @@ document.addEventListener('DOMContentLoaded', () => {
             body: formData
         }).then(() => {
             console.log("IMAGEN GUARDADA")
+            mensajeproductoguardado()
         });
 
 
     });
 
+
+
+    function mensajeproductoguardado() {
+        Toastify({
+            text: "Producto guardado exitosamente",
+            duration: 3000,
+            close: true,
+            gravity: "top", 
+            position: "right", 
+            stopOnFocus: true, 
+            style: {
+              background: "linear-gradient(to right, #4b33a8, #785ce9)",
+              borderRadius: "2rem",
+              textTransform: "uppercase",
+              fontSize: ".75rem"
+            },
+            offset: {
+                x: '1.5rem', // horizontal 
+                y: '1.5rem' // vertical 
+              }, // Callback after click
+          }).showToast();
+    
+    
+    }
 });
