@@ -196,6 +196,24 @@ main {
     color: var(--clr-white);
 }
 
+.producto-eliminar {
+    border: 0;
+    background-color: var(--clr-white);
+    color: var(--clr-main);
+    padding: .4rem;
+    text-transform: uppercase;
+    border-radius: 2rem;
+    cursor: pointer;
+    border: 2px solid var(--clr-white);
+    transition: background-color .2s, color .2s;
+}
+
+.producto-eliminar:hover {
+    background-color: var(--clr-main);
+    color: var(--clr-white);
+}
+
+
 
 /** CARRITO **/
 

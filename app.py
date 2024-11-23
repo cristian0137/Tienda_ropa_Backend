@@ -38,6 +38,10 @@ def registrar_producto():
 def carrito():
     return render_template("carrito.html")
 
+@app.route("/eliminar-producto")
+def eliminarProducto():
+    return render_template("eliminar_producto.html")
+
 # AGREGAR
 @app.route('/Agregarproducto',methods = ['POST'])
 def Agregar_produto():
@@ -110,7 +114,7 @@ def Obtener_carrito():
     return jsonify(carritos_dict) 
 
 #ELIMINAR
-@app.route('/EliminarProducto', methods = ['DELETE'])
+@app.route('/eliminar_producto', methods = ['DELETE'])
 def Eliminar_producto():
     id = request.json['id']
     producto = Producto.query.get(id)
@@ -120,7 +124,7 @@ def Eliminar_producto():
     
     db.session.delete(producto)
     db.session.commit()
-    return 'producto eliminado', 200
+    return  jsonify({"message": "Producto eliminado"}), 200
 
 @app.route('/Eliminar_p_c', methods=['DELETE'])
 def Eliminar_producto_carrito():

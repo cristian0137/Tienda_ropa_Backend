@@ -36,6 +36,7 @@ function cargarProductos(productosElegidos) {
                 <h3 class="producto-titulo">${producto.titulo}</h3>
                 <p class="producto-precio">$${producto.precio}</p>
                 <button class="producto-agregar" id="${producto.id}">Agregar</button>
+                <button class="producto-eliminar" id="eliminar-${producto.id}">Eliminar</button>
             </div>
         `;
 
@@ -72,9 +73,14 @@ botonesCategorias.forEach(boton => {
 
 function actualizarBotonesAgregar() {
     botonesAgregar = document.querySelectorAll(".producto-agregar");
+    botonesEliminar = document.querySelectorAll(".producto-eliminar");
 
     botonesAgregar.forEach(boton => {
         boton.addEventListener("click", agregarAlCarrito);
+    });
+
+    botonesEliminar.forEach(boton => {
+        boton.addEventListener("click", eliminarDelCarrito);
     });
 }
 
@@ -130,4 +136,51 @@ function agregarAlCarrito(e) {
 function actualizarNumerito() {
     let nuevoNumerito = productosEnCarrito.reduce((acc, producto) => acc + producto.cantidad, 0);
     numerito.innerText = nuevoNumerito;
+}
+
+function eliminarDelCarrito(e) {
+    const idBoton = e.currentTarget.id.split('-')[1]; // Obtener ID del producto
+
+    
+    fetch("/eliminar_producto", {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ id: idBoton })
+    })
+    .then(() => {
+        console.log("Se elimino sastifactoriamente")
+        mensajeproductoeliminado()
+    })
+    .catch(error => console.error("Error en la solicitud:", error));
+
+
+
+}
+
+function mensajeproductoeliminado() {
+    Toastify({
+        text: "Producto eliminado exitosamente",
+        duration: 3000,
+        close: true,
+        gravity: "top", 
+        position: "right", 
+        stopOnFocus: true, 
+        style: {
+          background: "linear-gradient(to right, #4b33a8, #785ce9)",
+          borderRadius: "2rem",
+          textTransform: "uppercase",
+          fontSize: ".75rem"
+        },
+        offset: {
+            x: '1.5rem', // horizontal 
+            y: '1.5rem' // vertical 
+          }, // Callback after click
+      }).showToast();
+
+      setTimeout(() => {
+        location.reload();
+    }, 1000);
+
 }
