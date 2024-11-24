@@ -14,6 +14,7 @@ document.getElementById('form').addEventListener('submit', function(event) {
     }
 
     fetch(`/actualizar_producto/${productoId}`, {
+        
         method: 'POST',
         body: formData
     })

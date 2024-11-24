@@ -4,7 +4,7 @@ class Carrito(db.Model):
     __tablename__ = 'carrito'
     
     id = db.Column(db.Integer, primary_key=True)
-    id_producto= db.Column(db.Integer,db.ForeignKey("productos.id"))
+    id_producto = db.Column(db.Integer, db.ForeignKey("productos.id", ondelete='CASCADE'))
     titulo = db.Column(db.String(255), )
     imagen = db.Column(db.String(255), ) 
     categoria = db.Column(db.String(50),)
