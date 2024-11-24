@@ -3,23 +3,20 @@ fetch("/Obtenerproductos")
     .then(response => response.json())
     .then(data => {
         productos = data;
+        console.log(productos)
         cargarProductos(productos);
 
     })
-        
-//url_for('static', filename='images/mi_imagen.jpg');//C:\Users\crist\OneDrive\Escritorio\Tienda_ropa_backend\Tienda_ropa_Backend\config\static\img\imagen1.png
 
-//  static/img/imagen1.png
+
 const contenedorProductos = document.querySelector("#contenedor-productos");
 const botonesCategorias = document.querySelectorAll(".boton-categoria");
 const tituloPrincipal = document.querySelector("#titulo-principal");
-let botonesAgregar = document.querySelectorAll(".producto-agregar");
+let botonesAgregar = document.querySelectorAll(".producto-agregar");//--------------------------------------
 const numerito = document.querySelector("#numerito");
 
 
-botonesCategorias.forEach(boton => boton.addEventListener("click", () => {
-    aside.classList.remove("aside-visible");
-}))
+
 
 
 function cargarProductos(productosElegidos) {
@@ -35,7 +32,7 @@ function cargarProductos(productosElegidos) {
             <div class="producto-detalles">
                 <h3 class="producto-titulo">${producto.titulo}</h3>
                 <p class="producto-precio">$${producto.precio}</p>
-                <button class="producto-agregar" id="${producto.id}">Agregar</button>
+                <button class="producto-agregar" id="${producto.id}">Agregar</button> 
             </div>
         `;
 
@@ -51,7 +48,7 @@ botonesCategorias.forEach(boton => {
         botonesCategorias.forEach(boton => boton.classList.remove("active"));
         e.currentTarget.classList.add("active");
 
-        let productosFiltrados = []; 
+        let productosFiltrados = [];
 
         if (e.currentTarget.id != "todos") {
             productosFiltrados = productos.filter(producto => producto.categoria === e.currentTarget.id);
@@ -78,54 +75,96 @@ function actualizarBotonesAgregar() {
     });
 }
 
-let productosEnCarrito;
 
-let productosEnCarritoLS = localStorage.getItem("productos-en-carrito");
 
-if (productosEnCarritoLS) {
-    productosEnCarrito = JSON.parse(productosEnCarritoLS);
-    actualizarNumerito();
-} else {
-    productosEnCarrito = [];
-}
+let productosEnCarrito = JSON.parse(localStorage.getItem("productos-en-carrito")) || [];
+actualizarNumerito();
 
 function agregarAlCarrito(e) {
-
-    Toastify({
-        text: "Producto agregado",
-        duration: 3000,
-        close: true,
-        gravity: "top", // `top` or `bottom`
-        position: "right", // `left`, `center` or `right`
-        stopOnFocus: true, // Prevents dismissing of toast on hover
-        style: {
-          background: "linear-gradient(to right, #4b33a8, #785ce9)",
-          borderRadius: "2rem",
-          textTransform: "uppercase",
-          fontSize: ".75rem"
-        },
-        offset: {
-            x: '1.5rem', // horizontal axis - can be a number or a string indicating unity. eg: '2em'
-            y: '1.5rem' // vertical axis - can be a number or a string indicating unity. eg: '2em'
-          },
-        onClick: function(){} // Callback after click
-      }).showToast();
-
-    const idBoton = e.currentTarget.id;
+    const idBoton = parseInt(e.currentTarget.id);
     const productoAgregado = productos.find(producto => producto.id === idBoton);
+    let mensajeToast = "Producto agregado";
 
-    if(productosEnCarrito.some(producto => producto.id === idBoton)) {
-        const index = productosEnCarrito.findIndex(producto => producto.id === idBoton);
-        productosEnCarrito[index].cantidad++;
+    if (productoAgregado) {
+        const productoParaActualizar = {
+            id_producto: productoAgregado.id
+        };
+
+        
+        fetch("/ActualizarCarrito", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(productoParaActualizar)
+        })
+        .then(response => {
+            if (response.status === 404) {
+                const productoParaCarrito = {
+                    id_producto: productoAgregado.id,
+                    titulo: productoAgregado.titulo,
+                    imagen: productoAgregado.imagen,
+                    categoria: productoAgregado.categoria,
+                    precio: productoAgregado.precio,
+                    talla: productoAgregado.talla, 
+                    cantidad: 1, 
+                    cantidad_stop: productoAgregado.cantidad
+                };
+
+                return fetch("/Agregarcarrito", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(productoParaCarrito)
+                });
+            } else if (response.status === 400) {
+                mensajeToast = "No hay más producto disponible";
+                throw new Error("Límite de producto alcanzado.");
+            } else if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error("Error al actualizar el carrito.");
+            }
+        })
+        .then(data => {
+            if (data) {
+                console.log("Producto actualizado o agregado:", data);
+                actualizarNumerito();
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+        })
+        .finally(() => {
+            Toastify({
+                text: mensajeToast,
+                duration: 3000,
+                close: true,
+                gravity: "top", 
+                position: "right", 
+                stopOnFocus: true, 
+                style: {
+                    background: mensajeToast === "No hay más producto disponible"
+                        ? "linear-gradient(to right, #ff0000, #ff7373)" 
+                        : "linear-gradient(to right, #4b33a8, #785ce9)", 
+                    borderRadius: "2rem",
+                    textTransform: "uppercase",
+                    fontSize: ".75rem"
+                },
+                offset: {
+                    x: '1.5rem', 
+                    y: '1.5rem' 
+                },
+                onClick: function () { } 
+            }).showToast();
+        });
     } else {
-        productoAgregado.cantidad = 1;
-        productosEnCarrito.push(productoAgregado);
+        console.error("Producto no encontrado");
     }
-
-    actualizarNumerito();
-
-    localStorage.setItem("productos-en-carrito", JSON.stringify(productosEnCarrito));
 }
+
+
 
 function actualizarNumerito() {
     let nuevoNumerito = productosEnCarrito.reduce((acc, producto) => acc + producto.cantidad, 0);

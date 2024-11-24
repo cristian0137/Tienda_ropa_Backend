@@ -57,7 +57,7 @@ def Agregar_produto():
 @app.route('/Agregarcarrito',methods = ['POST'])
 def Agregar_carrito():
     data = request.get_json()
-    nuevo_procurador = Carrito(
+    nuevo_producto = Carrito(
         id_producto = data.get('id_producto'),
         titulo =  data.get('titulo'),
         imagen =  data.get('imagen'),
@@ -65,8 +65,9 @@ def Agregar_carrito():
         precio =  data.get('precio'),
         talla =  data.get('talla'),
         cantidad =  data.get('cantidad'),
+        cantidad_stop =  data.get('cantidad_stop'),
     )
-    db.session.add(nuevo_procurador)
+    db.session.add(nuevo_producto)
     db.session.commit()
     return 'Producto guardado',201
 
@@ -134,9 +135,45 @@ def Eliminar_producto_carrito():
     db.session.commit()
     return 'Producto eliminado',200
 
+@app.route('/EliminarTodosProductosCarrito', methods=['DELETE'])
+def eliminar_todos_productos_carrito():
+    try:
+        productos = Carrito.query.all()
+        if not productos:
+            return 'No hay productos para eliminar', 404
+        for producto in productos:
+            db.session.delete(producto)
+        db.session.commit()
+        
+        return 'Todos los productos fueron eliminados', 200
+    except Exception as e:
+        db.session.rollback() 
+        return f'Error al eliminar los productos: {str(e)}', 500
 
 
 
+#Editar
+
+@app.route('/ActualizarCarrito', methods=['POST'])
+def actualizar_carrito():
+    datos = request.json
+    id_producto = datos.get('id_producto')
+
+    if not id_producto:
+        return jsonify({"error": "El campo 'id_producto' es obligatorio"}), 402
+    producto_en_carrito = Carrito.query.filter_by(id_producto=id_producto).first()
+    if producto_en_carrito:
+        if producto_en_carrito.cantidad == producto_en_carrito.cantidad_stop:
+            return jsonify({
+                "error": "No se puede incrementar la cantidad. Se alcanzó el límite máximo permitido.",
+                "cantidad_actual": producto_en_carrito.cantidad,
+                "cantidad_stop": producto_en_carrito.cantidad_stop
+            }), 400
+        producto_en_carrito.cantidad += 1
+        db.session.commit()
+        return jsonify({"mensaje": "Cantidad actualizada", "producto": producto_en_carrito.to_dict()}), 200
+    else:
+        return jsonify({"error": "El producto no está en el carrito"}), 404
 
 
 
