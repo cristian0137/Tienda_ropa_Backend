@@ -38,6 +38,10 @@ def registrar_producto():
 def carrito():
     return render_template("carrito.html")
 
+@app.route("/eliminar-producto")
+def eliminarProducto():
+    return render_template("eliminar_producto.html")
+
 # AGREGAR
 @app.route('/Agregarproducto',methods = ['POST'])
 def Agregar_produto():
@@ -104,6 +108,8 @@ def Obtener_productos():
     productos_dict = [producto.to_dict() for producto in productos]
     return jsonify(productos_dict) 
 
+
+
 @app.route('/Obtenercarrito',methods = ['GET'])
 def Obtener_carrito():
     carritos = Carrito.query.all()
@@ -111,7 +117,7 @@ def Obtener_carrito():
     return jsonify(carritos_dict) 
 
 #ELIMINAR
-@app.route('/EliminarProducto', methods = ['DELETE'])
+@app.route('/eliminar_producto', methods = ['DELETE'])
 def Eliminar_producto():
     id = request.json['id']
     producto = Producto.query.get(id)
@@ -121,7 +127,7 @@ def Eliminar_producto():
     
     db.session.delete(producto)
     db.session.commit()
-    return 'producto eliminado', 200
+    return  jsonify({"message": "Producto eliminado"}), 200
 
 @app.route('/Eliminar_p_c', methods=['DELETE'])
 def Eliminar_producto_carrito():
@@ -150,6 +156,42 @@ def eliminar_todos_productos_carrito():
         db.session.rollback() 
         return f'Error al eliminar los productos: {str(e)}', 500
 
+@app.route('/editar_producto/<int:producto_id>', methods=['GET'])
+def editar_producto(producto_id):
+    # Buscar el producto en la base de datos usando el ID
+    producto = Producto.query.get(producto_id)
+    
+    if producto is None:
+        return "Producto no encontrado", 404  # Si no existe el producto
+    
+    # Pasar el producto a la plantilla HTML para editarlo
+    return render_template('editar_producto.html', producto=producto)
+
+
+@app.route('/actualizar_producto/<int:producto_id>', methods=['POST'])
+def actualizar_producto(producto_id):
+    producto = Producto.query.get(producto_id)
+    
+    if producto is None:
+        return jsonify({'success': False, 'message': 'Producto no encontrado'}), 404
+
+    producto.titulo = request.form['titulo']
+    producto.cantidad = request.form['cantidad']
+    producto.precio = request.form['precio']
+    producto.talla = request.form['talla']
+    producto.categoria = request.form['categoria']
+    
+    if 'imagen' in request.files:
+        imagen = request.files['imagen']
+        if imagen and allowed_file(imagen.filename):
+            filename = secure_filename(imagen.filename)
+            image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            imagen.save(image_path)
+            producto.imagen = f'/static/img/{filename}'
+
+    db.session.commit()
+
+    return jsonify({'success': True, 'message': 'Producto actualizado correctamente'})
 
 
 #Editar

@@ -196,6 +196,42 @@ main {
     color: var(--clr-white);
 }
 
+.producto-eliminar {
+    border: 0;
+    background-color: var(--clr-white);
+    color: var(--clr-main);
+    padding: .4rem;
+    text-transform: uppercase;
+    border-radius: 2rem;
+    cursor: pointer;
+    border: 2px solid var(--clr-white);
+    transition: background-color .2s, color .2s;
+}
+
+.producto-eliminar:hover {
+    background-color: var(--clr-main);
+    color: var(--clr-white);
+}
+
+.producto-editar {
+    border: 0;
+    background-color: var(--clr-white);
+    color: var(--clr-main);
+    padding: .4rem;
+    text-transform: uppercase;
+    border-radius: 2rem;
+    cursor: pointer;
+    border: 2px solid var(--clr-white);
+    transition: background-color .2s, color .2s;
+}
+
+.producto-editar:hover {
+    background-color: var(--clr-main);
+    color: var(--clr-white);
+}
+
+
+
 
 /** CARRITO **/
 
@@ -600,5 +636,33 @@ form .button input:hover {
 @media screen and (max-width: 400px) {
     .contenedor-productos {
         grid-template-columns: 1fr;
+    }
+}
+
+.d-flex {
+    display: flex; /* Activa el modo flexbox */
+}
+
+.justify-content-center {
+    justify-content: center; /* Alinea horizontalmente en el centro */
+}
+
+.align-items-center {
+    align-items: center; /* Asegura la alineación vertical */
+}
+
+.gap-2 {
+    gap: 0.5rem; /* Añade espacio entre los elementos */
+}
+
+.btn {
+    flex-shrink: 0; /* Evita que los botones se reduzcan */
+    white-space: nowrap; /* Evita que el texto se rompa */
+}
+
+@media screen and (max-width: 600px) {
+    .d-flex {
+        flex-direction: column; /* Cambia a disposición vertical */
+        gap: 0.5rem; /* Añade espacio vertical */
     }
 }
