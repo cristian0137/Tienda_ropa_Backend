@@ -195,7 +195,7 @@ def actualizar_producto(producto_id):
 
 
 #Editar
-
+    
 @app.route('/ActualizarCarrito', methods=['POST'])
 def actualizar_carrito():
     datos = request.json
@@ -203,19 +203,35 @@ def actualizar_carrito():
 
     if not id_producto:
         return jsonify({"error": "El campo 'id_producto' es obligatorio"}), 402
+
+    # Buscar el producto en el carrito
     producto_en_carrito = Carrito.query.filter_by(id_producto=id_producto).first()
-    if producto_en_carrito:
-        if producto_en_carrito.cantidad == producto_en_carrito.cantidad_stop:
-            return jsonify({
-                "error": "No se puede incrementar la cantidad. Se alcanzó el límite máximo permitido.",
-                "cantidad_actual": producto_en_carrito.cantidad,
-                "cantidad_stop": producto_en_carrito.cantidad_stop
-            }), 400
-        producto_en_carrito.cantidad += 1
-        db.session.commit()
-        return jsonify({"mensaje": "Cantidad actualizada", "producto": producto_en_carrito.to_dict()}), 200
-    else:
+    if not producto_en_carrito:
         return jsonify({"error": "El producto no está en el carrito"}), 404
+
+    # Buscar el producto en la tabla de productos
+    producto = Producto.query.filter_by(id=id_producto).first()
+    if not producto:
+        return jsonify({"error": "El producto no existe en la base de datos"}), 404
+
+    # Validar que la cantidad en el carrito no exceda la cantidad disponible en la tabla de productos
+    if producto_en_carrito.cantidad == producto.cantidad:
+        return jsonify({
+            "error": "No se puede incrementar la cantidad. Se alcanzó el límite máximo permitido.",
+            "cantidad_actual": producto_en_carrito.cantidad,
+            "cantidad_disponible": producto.cantidad
+        }), 400
+
+    # Incrementar la cantidad en el carrito
+    producto_en_carrito.cantidad += 1
+    db.session.commit()
+
+    return jsonify({"mensaje": "Cantidad actualizada", "producto": producto_en_carrito.to_dict()}), 200
+
+
+
+
+
 
 @app.route('/ComprarCarrito', methods=['POST'])
 def comprar_carrito():
