@@ -13,10 +13,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function cargarProductosCarrito() {
         try {
-            const response = await fetch('/Obtenercarrito'); // Llama al endpoint para obtener el carrito
+            const response = await fetch('/Obtenercarrito'); 
             if (!response.ok) throw new Error('Error al obtener productos del carrito');
 
-            const productosEnCarrito = await response.json(); // Obtiene la respuesta en formato JSON
+            const productosEnCarrito = await response.json(); 
             let total =0
             if (productosEnCarrito.length > 0) {
                 contenedorCarritoVacio.classList.add("disabled");
@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 contenedorCarritoAcciones.classList.remove("disabled");
                 contenedorCarritoComprado.classList.add("disabled");
 
-                contenedorCarritoProductos.innerHTML = ""; // Limpia el contenedor
+                contenedorCarritoProductos.innerHTML = "";
 
                 productosEnCarrito.forEach(producto => {
                     const subtotal = (producto.cantidad * producto.precio).toFixed(3);
@@ -82,17 +82,16 @@ document.addEventListener("DOMContentLoaded", () => {
     function eliminarDelCarrito(e) {
         const idBoton = e.currentTarget.id;
 
-        // Realizar solicitud DELETE a la API
+        
         fetch("/Eliminar_p_c", {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ id: idBoton }) // Enviar ID del producto
+            body: JSON.stringify({ id: idBoton }) 
         })
             .then(response => {
                 if (response.ok) {
-                    // Si la eliminación fue exitosa
                     return response.text();
                 } else if (response.status === 404) {
                     throw new Error("El producto no fue encontrado.");
@@ -103,7 +102,6 @@ document.addEventListener("DOMContentLoaded", () => {
             .then(message => {
                 console.log(message);
                 cargarProductosCarrito()
-                // Notificar éxito
                 Toastify({
                     text: "Producto eliminado",
                     duration: 3000,
@@ -127,7 +125,6 @@ document.addEventListener("DOMContentLoaded", () => {
             .catch(error => {
                 console.error(error);
 
-                // Notificar error
                 Toastify({
                     text: error.message,
                     duration: 3000,
@@ -182,17 +179,34 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     botonComprar.addEventListener("click", comprarCarrito);
-    function comprarCarrito() {
-
-        productosEnCarrito.length = 0;
-        localStorage.setItem("productos-en-carrito", JSON.stringify(productosEnCarrito));
-
-        contenedorCarritoVacio.classList.add("disabled");
-        contenedorCarritoProductos.classList.add("disabled");
-        contenedorCarritoAcciones.classList.add("disabled");
-        contenedorCarritoComprado.classList.remove("disabled");
- 
+    async function comprarCarrito() {
+        try {
+            const response = await fetch('/ComprarCarrito', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+    
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Error al realizar la compra');
+            }
+    
+            const data = await response.json();
+            console.log(data.mensaje); 
+            
+            contenedorCarritoVacio.classList.add("disabled");
+            contenedorCarritoProductos.classList.add("disabled");
+            contenedorCarritoAcciones.classList.add("disabled");
+            contenedorCarritoComprado.classList.remove("disabled");
+    
+        } catch (error) {
+            console.error('Error al realizar la compra:', error);
+            alert(`Hubo un error al procesar la compra: ${error.message}`);
+        }
     }
+    
 
 
 

@@ -175,6 +175,37 @@ def actualizar_carrito():
     else:
         return jsonify({"error": "El producto no está en el carrito"}), 404
 
+@app.route('/ComprarCarrito', methods=['POST'])
+def comprar_carrito():
+    try:
+        productos_en_carrito = Carrito.query.all()
+
+        if not productos_en_carrito:
+            return jsonify({"error": "El carrito está vacío"}), 404
+
+        for item in productos_en_carrito:
+            producto = Producto.query.filter_by(id=item.id_producto).first()
+            if not producto:
+                return jsonify({"error": f"Producto con ID {item.id_producto} no encontrado"}), 404
+
+            if producto.cantidad < item.cantidad:
+                return jsonify({
+                    "error": f"Stock insuficiente para el producto {producto.nombre}.",
+                    "stock_disponible": producto.cantidad,
+                    "cantidad_requerida": item.cantidad
+                }), 400
+
+            producto.cantidad -= item.cantidad
+
+        Carrito.query.delete()
+        db.session.commit()
+
+        return jsonify({"mensaje": "Compra realizada con éxito. Carrito vaciado."}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": "Ocurrió un error al procesar la compra.", "detalle": str(e)}), 500
+
+
 
 
 
