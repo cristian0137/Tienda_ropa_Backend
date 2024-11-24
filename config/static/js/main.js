@@ -31,13 +31,26 @@ function cargarProductos(productosElegidos) {
         const div = document.createElement("div");
         div.classList.add("producto");
         div.innerHTML = `
-            <img class="producto-imagen" src="${producto.imagen}" alt="${producto.titulo}">
-            <div class="producto-detalles">
-                <h3 class="producto-titulo">${producto.titulo}</h3>
-                <p class="producto-precio">$${producto.precio}</p>
-                <button class="producto-agregar" id="${producto.id}">Agregar</button>
-                <button class="producto-eliminar" id="eliminar-${producto.id}">Eliminar</button>
-            </div>
+         <div class="card producto mb-4" style="width: 18rem;">
+  <img src="${producto.imagen}" class="card-img-top producto-imagen" alt="${producto.titulo}">
+  <div class="card-body producto-detalles">
+    <h5 class="card-title producto-titulo">${producto.titulo}</h5>
+    <p class="card-text producto-precio">$${producto.precio}</p>
+    <div class="d-flex justify-content-center align-items-center gap-2">
+      <button class="btn btn-primary btn-sm producto-agregar" id="${producto.id}">
+        <i class="bi bi-cart-plus"></i> Agregar
+      </button>
+      <button class="btn btn-warning btn-sm producto-editar" data-id="${producto.id}">
+    <i class="bi bi-pencil-square"></i> Editar
+</button>
+
+      <button class="btn btn-danger btn-sm producto-eliminar" id="eliminar-${producto.id}">
+        <i class="bi bi-trash"></i> Eliminar
+      </button>
+    </div>
+  </div>
+</div>
+
         `;
 
         contenedorProductos.append(div);
@@ -74,6 +87,7 @@ botonesCategorias.forEach(boton => {
 function actualizarBotonesAgregar() {
     botonesAgregar = document.querySelectorAll(".producto-agregar");
     botonesEliminar = document.querySelectorAll(".producto-eliminar");
+    botonesEditar = document.querySelectorAll(".producto-editar");
 
     botonesAgregar.forEach(boton => {
         boton.addEventListener("click", agregarAlCarrito);
@@ -81,6 +95,14 @@ function actualizarBotonesAgregar() {
 
     botonesEliminar.forEach(boton => {
         boton.addEventListener("click", eliminarDelCarrito);
+    });
+
+    botonesEditar.forEach(boton => {
+        boton.addEventListener("click", (e) => {
+            const productoId = e.currentTarget.getAttribute("data-id");  
+            
+            window.location.href = `/editar_producto/${productoId}`;
+        });
     });
 }
 
