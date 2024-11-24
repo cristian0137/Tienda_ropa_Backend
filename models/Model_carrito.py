@@ -11,6 +11,7 @@ class Carrito(db.Model):
     precio = db.Column(db.String(50))
     talla = db.Column(db.String(10),)
     cantidad = db.Column(db.Integer,)
+    cantidad_stop= db.Column(db.Integer,)
 
     def to_dict(self):
         return {
@@ -21,5 +22,6 @@ class Carrito(db.Model):
             "categoria": self.categoria,
             "precio": self.precio,
             "talla": self.talla,
-            "cantidad": self.cantidad
+            "cantidad": self.cantidad,
+            "cantidad_stop": self.cantidad_stop
         }

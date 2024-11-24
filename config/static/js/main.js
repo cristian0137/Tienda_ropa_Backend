@@ -3,23 +3,20 @@ fetch("/Obtenerproductos")
     .then(response => response.json())
     .then(data => {
         productos = data;
+        console.log(productos)
         cargarProductos(productos);
 
     })
-        
-//url_for('static', filename='images/mi_imagen.jpg');//C:\Users\crist\OneDrive\Escritorio\Tienda_ropa_backend\Tienda_ropa_Backend\config\static\img\imagen1.png
 
-//  static/img/imagen1.png
+
 const contenedorProductos = document.querySelector("#contenedor-productos");
 const botonesCategorias = document.querySelectorAll(".boton-categoria");
 const tituloPrincipal = document.querySelector("#titulo-principal");
-let botonesAgregar = document.querySelectorAll(".producto-agregar");
+let botonesAgregar = document.querySelectorAll(".producto-agregar");//--------------------------------------
 const numerito = document.querySelector("#numerito");
 
 
-botonesCategorias.forEach(boton => boton.addEventListener("click", () => {
-    aside.classList.remove("aside-visible");
-}))
+
 
 
 function cargarProductos(productosElegidos) {
@@ -65,7 +62,7 @@ botonesCategorias.forEach(boton => {
         botonesCategorias.forEach(boton => boton.classList.remove("active"));
         e.currentTarget.classList.add("active");
 
-        let productosFiltrados = []; 
+        let productosFiltrados = [];
 
         if (e.currentTarget.id != "todos") {
             productosFiltrados = productos.filter(producto => producto.categoria === e.currentTarget.id);
@@ -106,16 +103,10 @@ function actualizarBotonesAgregar() {
     });
 }
 
-let productosEnCarrito;
 
-let productosEnCarritoLS = localStorage.getItem("productos-en-carrito");
 
-if (productosEnCarritoLS) {
-    productosEnCarrito = JSON.parse(productosEnCarritoLS);
-    actualizarNumerito();
-} else {
-    productosEnCarrito = [];
-}
+let productosEnCarrito = JSON.parse(localStorage.getItem("productos-en-carrito")) || [];
+actualizarNumerito();
 
 function agregarAlCarrito(e) {
 
