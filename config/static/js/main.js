@@ -32,7 +32,8 @@ function cargarProductos(productosElegidos) {
             <div class="producto-detalles">
                 <h3 class="producto-titulo">${producto.titulo}</h3>
                 <p class="producto-precio">$${producto.precio}</p>
-                <button class="producto-agregar" id="${producto.id}">Agregar</button> 
+                <button class="producto-agregar" id="${producto.id}">Agregar</button>
+                <button class="producto-eliminar" id="eliminar-${producto.id}">Eliminar</button>
             </div>
         `;
 
@@ -69,9 +70,14 @@ botonesCategorias.forEach(boton => {
 
 function actualizarBotonesAgregar() {
     botonesAgregar = document.querySelectorAll(".producto-agregar");
+    botonesEliminar = document.querySelectorAll(".producto-eliminar");
 
     botonesAgregar.forEach(boton => {
         boton.addEventListener("click", agregarAlCarrito);
+    });
+
+    botonesEliminar.forEach(boton => {
+        boton.addEventListener("click", eliminarDelCarrito);
     });
 }
 
@@ -81,92 +87,91 @@ let productosEnCarrito = JSON.parse(localStorage.getItem("productos-en-carrito")
 actualizarNumerito();
 
 function agregarAlCarrito(e) {
-    const idBoton = parseInt(e.currentTarget.id);
+
+    Toastify({
+        text: "Producto agregado",
+        duration: 3000,
+        close: true,
+        gravity: "top", // `top` or `bottom`
+        position: "right", // `left`, `center` or `right`
+        stopOnFocus: true, // Prevents dismissing of toast on hover
+        style: {
+          background: "linear-gradient(to right, #4b33a8, #785ce9)",
+          borderRadius: "2rem",
+          textTransform: "uppercase",
+          fontSize: ".75rem"
+        },
+        offset: {
+            x: '1.5rem', // horizontal axis - can be a number or a string indicating unity. eg: '2em'
+            y: '1.5rem' // vertical axis - can be a number or a string indicating unity. eg: '2em'
+          },
+        onClick: function(){} // Callback after click
+      }).showToast();
+
+    const idBoton = e.currentTarget.id;
     const productoAgregado = productos.find(producto => producto.id === idBoton);
-    let mensajeToast = "Producto agregado";
 
-    if (productoAgregado) {
-        const productoParaActualizar = {
-            id_producto: productoAgregado.id
-        };
-
-        
-        fetch("/ActualizarCarrito", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(productoParaActualizar)
-        })
-        .then(response => {
-            if (response.status === 404) {
-                const productoParaCarrito = {
-                    id_producto: productoAgregado.id,
-                    titulo: productoAgregado.titulo,
-                    imagen: productoAgregado.imagen,
-                    categoria: productoAgregado.categoria,
-                    precio: productoAgregado.precio,
-                    talla: productoAgregado.talla, 
-                    cantidad: 1, 
-                    cantidad_stop: productoAgregado.cantidad
-                };
-
-                return fetch("/Agregarcarrito", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(productoParaCarrito)
-                });
-            } else if (response.status === 400) {
-                mensajeToast = "No hay más producto disponible";
-                throw new Error("Límite de producto alcanzado.");
-            } else if (response.ok) {
-                return response.json();
-            } else {
-                throw new Error("Error al actualizar el carrito.");
-            }
-        })
-        .then(data => {
-            if (data) {
-                console.log("Producto actualizado o agregado:", data);
-                actualizarNumerito();
-            }
-        })
-        .catch(error => {
-            console.error("Error:", error);
-        })
-        .finally(() => {
-            Toastify({
-                text: mensajeToast,
-                duration: 3000,
-                close: true,
-                gravity: "top", 
-                position: "right", 
-                stopOnFocus: true, 
-                style: {
-                    background: mensajeToast === "No hay más producto disponible"
-                        ? "linear-gradient(to right, #ff0000, #ff7373)" 
-                        : "linear-gradient(to right, #4b33a8, #785ce9)", 
-                    borderRadius: "2rem",
-                    textTransform: "uppercase",
-                    fontSize: ".75rem"
-                },
-                offset: {
-                    x: '1.5rem', 
-                    y: '1.5rem' 
-                },
-                onClick: function () { } 
-            }).showToast();
-        });
+    if(productosEnCarrito.some(producto => producto.id === idBoton)) {
+        const index = productosEnCarrito.findIndex(producto => producto.id === idBoton);
+        productosEnCarrito[index].cantidad++;
     } else {
-        console.error("Producto no encontrado");
+        productoAgregado.cantidad = 1;
+        productosEnCarrito.push(productoAgregado);
     }
+
+    actualizarNumerito();
+
+    localStorage.setItem("productos-en-carrito", JSON.stringify(productosEnCarrito));
 }
-
-
 
 function actualizarNumerito() {
     let nuevoNumerito = productosEnCarrito.reduce((acc, producto) => acc + producto.cantidad, 0);
     numerito.innerText = nuevoNumerito;
+}
+
+function eliminarDelCarrito(e) {
+    const idBoton = e.currentTarget.id.split('-')[1]; // Obtener ID del producto
+
+    
+    fetch("/eliminar_producto", {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ id: idBoton })
+    })
+    .then(() => {
+        console.log("Se elimino sastifactoriamente")
+        mensajeproductoeliminado()
+    })
+    .catch(error => console.error("Error en la solicitud:", error));
+
+
+
+}
+
+function mensajeproductoeliminado() {
+    Toastify({
+        text: "Producto eliminado exitosamente",
+        duration: 3000,
+        close: true,
+        gravity: "top", 
+        position: "right", 
+        stopOnFocus: true, 
+        style: {
+          background: "linear-gradient(to right, #4b33a8, #785ce9)",
+          borderRadius: "2rem",
+          textTransform: "uppercase",
+          fontSize: ".75rem"
+        },
+        offset: {
+            x: '1.5rem', // horizontal 
+            y: '1.5rem' // vertical 
+          }, // Callback after click
+      }).showToast();
+
+      setTimeout(() => {
+        location.reload();
+    }, 1000);
+
 }
